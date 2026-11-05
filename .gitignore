@@ -1,0 +1,16 @@
+# Local Netlify folder
+.netlify/
+
+# Dependencies
+node_modules/
+
+# Local downloaded archives & extracted folders
+*.crx
+*.zip
+sortlens_extension/
+
+# OS and logs
+*.log
+.DS_Store
+Thumbs.db
+

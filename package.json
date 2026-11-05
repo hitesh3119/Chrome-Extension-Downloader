@@ -1,0 +1,13 @@
+{
+  "name": "chrome-extension-downloader",
+  "version": "1.0.0",
+  "description": "Download any Chrome Extension as ZIP or CRX directly",
+  "type": "module",
+  "scripts": {
+    "dev": "npx netlify dev"
+  },
+  "keywords": ["chrome-extension", "crx", "zip", "downloader", "netlify"],
+  "author": "",
+  "license": "MIT"
+}
+

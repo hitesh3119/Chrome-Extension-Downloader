@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRX & ZIP Downloader - Download Any Chrome Extension Offline</title>
+  <meta name="description" content="Download any Chrome Extension directly as an unpacked ZIP or CRX file from Chrome Web Store. Hostable on Netlify.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="background-glows">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    <div class="glow glow-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-badge">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+        <span>CRX Extractor</span>
+      </div>
+      <h1 class="title">Download Chrome Extensions <span class="gradient-text">Offline as ZIP</span></h1>
+      <p class="subtitle">Enter any Chrome Web Store URL or Extension ID to instantly download the unpacked ZIP or original CRX file.</p>
+    </header>
+
+    <!-- Main Card -->
+    <main class="main-card">
+      <div class="input-section">
+        <label for="extension-input" class="input-label">
+          <span>Chrome Web Store URL or Extension ID</span>
+          <span class="badge-optional" id="id-badge" style="display: none;">Valid ID Detected</span>
+        </label>
+        
+        <div class="input-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input 
+            type="text" 
+            id="extension-input" 
+            placeholder="e.g. https://chromewebstore.google.com/detail/.../lankjdlpcafockikacbnbdngppglhjim"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button class="btn-clear" id="btn-clear" title="Clear input" style="display: none;">✕</button>
+          <button class="btn-paste" id="btn-paste" title="Paste from clipboard">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            </svg>
+            <span>Paste</span>
+          </button>
+        </div>
+
+        <!-- Detection Card -->
+        <div class="detection-box" id="detection-box" style="display: none;">
+          <div class="detection-info">
+            <span class="detection-label">Target ID:</span>
+            <code class="detection-id" id="detected-id">lankjdlpcafockikacbnbdngppglhjim</code>
+            <span class="detection-slug" id="detected-slug"></span>
+          </div>
+        </div>
+
+        <!-- Example Pills -->
+        <div class="examples-row">
+          <span class="examples-label">Try example:</span>
+          <button class="pill" id="example-sortlens">
+            <span>SortLens (Instagram)</span>
+          </button>
+          <button class="pill" id="example-ublock">
+            <span>uBlock Origin</span>
+          </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="buttons-grid">
+          <button class="btn-primary" id="btn-download-zip">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span class="btn-text">Download as ZIP (Unpacked)</span>
+            <div class="spinner" style="display: none;"></div>
+          </button>
+
+          <button class="btn-secondary" id="btn-download-crx">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+            <span class="btn-text">Download Raw CRX</span>
+          </button>
+        </div>
+
+        <!-- Status / Error Notification -->
+        <div class="status-box" id="status-box" style="display: none;">
+          <div class="status-icon" id="status-icon"></div>
+          <div class="status-message" id="status-message"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Instructions Guide -->
+    <section class="guide-card">
+      <h2 class="guide-title">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        How to Run Extensions Offline in Chrome
+      </h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h3>Download ZIP</h3>
+            <p>Paste the extension link above and click <strong>Download as ZIP</strong>. It automatically strips the CRX3 binary header.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h3>Extract Folder</h3>
+            <p>Right-click the downloaded <code>.zip</code> file and extract it into a dedicated folder on your computer.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h3>Developer Mode</h3>
+            <p>Open Chrome and go to <code class="mono-tag">chrome://extensions</code>. Toggle <strong>Developer mode</strong> in top-right.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h3>Load Unpacked</h3>
+            <p>Click <strong>Load unpacked</strong> button on the top-left and select your extracted folder. You're done!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Powered by Netlify Serverless Functions & Google CWS Engine &bull; Ready to Deploy</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
