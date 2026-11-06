@@ -1,4 +1,5 @@
-// Chrome Extension Downloader Frontend Logic (v2.1)
+// Chrome Extension Downloader Frontend Logic (v2.2)
+// Architect & Developer: Hitesh Khambhoo (hiteshkhambhoo.com)
 
 const inputEl = document.getElementById("extension-input");
 const btnClear = document.getElementById("btn-clear");
@@ -18,40 +19,51 @@ const statusMessage = document.getElementById("status-message");
 
 // Example Pills
 const exampleSortlens = document.getElementById("example-sortlens");
+const exampleAsksteve = document.getElementById("example-asksteve");
 const exampleUblock = document.getElementById("example-ublock");
 const exampleDarkreader = document.getElementById("example-darkreader");
 const exampleReact = document.getElementById("example-react");
 
-// Helper: Extract 32-char ID and formatted slug from input
+// Helper: Extract 32-char ID and formatted slug from input (supports query params & partial URLs)
 function parseInput(val) {
   const text = (val || "").trim();
+
+  // Extract 32-character ID (letters a-p only)
   const idMatch = text.match(/([a-p]{32})/i);
   const id = idMatch ? idMatch[1].toLowerCase() : null;
 
   let rawSlug = "";
   let cleanName = "Chrome Extension";
 
-  if (text.includes("chromewebstore.google.com/detail/")) {
-    const parts = text.split("/detail/")[1]?.split("/");
-    if (parts && parts.length > 0 && parts[0] !== id) {
-      rawSlug = parts[0];
-      cleanName = rawSlug
-        .split("-")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
-    }
-  } else if (text.includes("chrome.google.com/webstore/detail/")) {
-    const parts = text.split("/detail/")[1]?.split("/");
-    if (parts && parts.length > 0 && parts[0] !== id) {
-      rawSlug = parts[0];
-      cleanName = rawSlug
-        .split("-")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
+  const isStoreUrl =
+    text.includes("chromewebstore.google.com/detail/") ||
+    text.includes("chrome.google.com/webstore/detail/");
+
+  if (isStoreUrl) {
+    const detailIndex = text.indexOf("/detail/");
+    if (detailIndex !== -1) {
+      const afterDetail = text.substring(detailIndex + 8);
+      const cleanPath = afterDetail.split("?")[0].split("#")[0];
+      const segments = cleanPath.split("/").filter(Boolean);
+
+      if (segments.length > 0) {
+        if (segments[0] !== id) {
+          rawSlug = segments[0];
+        } else if (segments.length > 1 && segments[1] !== id) {
+          rawSlug = segments[1];
+        }
+
+        if (rawSlug) {
+          cleanName = rawSlug
+            .split("-")
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(" ");
+        }
+      }
     }
   }
 
-  return { id, slug: rawSlug, cleanName };
+  return { id, slug: rawSlug, cleanName, isStoreUrl, rawText: text };
 }
 
 // Update UI on input change
@@ -59,12 +71,18 @@ function updateUI() {
   const val = inputEl.value;
   btnClear.style.display = val ? "flex" : "none";
 
-  const { id, cleanName } = parseInput(val);
+  const { id, cleanName, isStoreUrl } = parseInput(val);
 
   if (id) {
     idBadge.style.display = "inline-flex";
     detectionBox.style.display = "block";
     detectedIdEl.textContent = id;
+    detectedSlugEl.textContent = cleanName;
+    hideStatus();
+  } else if (isStoreUrl) {
+    idBadge.style.display = "inline-flex";
+    detectionBox.style.display = "block";
+    detectedIdEl.textContent = "Resolving ID from store...";
     detectedSlugEl.textContent = cleanName;
     hideStatus();
   } else {
@@ -107,7 +125,7 @@ btnPaste.addEventListener("click", async () => {
 if (btnCopyId) {
   btnCopyId.addEventListener("click", async () => {
     const id = detectedIdEl.textContent;
-    if (id) {
+    if (id && id.length === 32) {
       try {
         await navigator.clipboard.writeText(id);
         copyText.textContent = "Copied!";
@@ -134,6 +152,12 @@ function loadExample(url) {
 if (exampleSortlens) {
   exampleSortlens.addEventListener("click", () =>
     loadExample("https://chromewebstore.google.com/detail/sortlens-sort-instagram-t/lankjdlpcafockikacbnbdngppglhjim")
+  );
+}
+
+if (exampleAsksteve) {
+  exampleAsksteve.addEventListener("click", () =>
+    loadExample("https://chromewebstore.google.com/detail/ask-steve-time-saving-ai/gldebcpkoojijledacjeboaehblhfbjg?hl=en-US&utm_source=ext_sidebar")
   );
 }
 
@@ -250,10 +274,13 @@ function triggerDownload(blob, filename) {
 
 // Perform Download via Netlify Function + Client Unpack
 async function handleDownload(format) {
-  const { id, slug } = parseInput(inputEl.value);
+  const { id, slug, isStoreUrl, rawText } = parseInput(inputEl.value);
 
-  if (!id) {
-    showStatus("Please enter a valid Chrome Web Store URL or 32-character Extension ID.", "error");
+  if (!id && !isStoreUrl) {
+    showStatus(
+      "Please enter a valid Chrome Web Store URL or 32-character Extension ID.<br><small style='opacity:0.8;'>Example: <code>https://chromewebstore.google.com/detail/ask-steve-time-saving-ai/gldebcpkoojijledacjeboaehblhfbjg</code></small>",
+      "error"
+    );
     inputEl.focus();
     return;
   }
@@ -273,11 +300,14 @@ async function handleDownload(format) {
     activeBtn.querySelector(".btn-sub-title").textContent = "Connecting to Google Store servers...";
   }
 
-  showStatus(`Connecting to Google Chrome Web Store for ID: <code>${id}</code>...`, "success");
+  const targetLabel = id ? `ID: <code>${id}</code>` : (slug || "Extension");
+  showStatus(`Connecting to Google Chrome Web Store for ${targetLabel}...`, "success");
 
   try {
-    const filename = slug ? `${slug}` : id;
-    const apiUrl = `/api/download?id=${encodeURIComponent(id)}&format=${format}&name=${encodeURIComponent(filename)}`;
+    const filename = slug || id || "extension";
+    const apiUrl = id
+      ? `/api/download?id=${encodeURIComponent(id)}&format=${format}&name=${encodeURIComponent(filename)}`
+      : `/api/download?url=${encodeURIComponent(rawText)}&format=${format}&name=${encodeURIComponent(filename)}`;
 
     const response = await fetch(apiUrl);
 
@@ -349,4 +379,3 @@ function forceBlankInput() {
 forceBlankInput();
 window.addEventListener("DOMContentLoaded", forceBlankInput);
 window.addEventListener("pageshow", forceBlankInput);
-

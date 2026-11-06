@@ -19,13 +19,43 @@ export default async (request, context) => {
   const format = (url.searchParams.get("format") || "zip").toLowerCase();
   const nameParam = url.searchParams.get("name") || "";
 
-  // Extract 32-character extension ID using regex
-  // Chrome Extension IDs always consist of 32 characters between 'a' and 'p'
+  let extensionId = "";
   const idMatch = inputParam.match(/([a-p]{32})/i);
-  if (!idMatch) {
+
+  if (idMatch) {
+    extensionId = idMatch[1].toLowerCase();
+  } else if (inputParam.includes("chromewebstore.google.com/detail/") || inputParam.includes("chrome.google.com/webstore/detail/")) {
+    // Auto-resolve: user pasted URL without 32-char ID (e.g. up to slug only)
+    try {
+      const pageRes = await fetch(inputParam, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+        redirect: "follow",
+      });
+
+      const finalUrl = pageRes.url || "";
+      const finalMatch = finalUrl.match(/([a-p]{32})/i);
+      if (finalMatch) {
+        extensionId = finalMatch[1].toLowerCase();
+      } else {
+        const html = await pageRes.text();
+        const canonicalMatch = html.match(/\/detail\/[^"']*?([a-p]{32})/i);
+        if (canonicalMatch) {
+          extensionId = canonicalMatch[1].toLowerCase();
+        }
+      }
+    } catch (e) {
+      console.error("Auto-resolve failed:", e);
+    }
+  }
+
+  if (!extensionId) {
     return new Response(
       JSON.stringify({
-        error: "Invalid extension ID or Chrome Web Store URL provided. Extension ID must be a 32-character string (e.g. lankjdlpcafockikacbnbdngppglhjim).",
+        error:
+          "Invalid extension ID or Chrome Web Store URL provided. Extension ID must be a 32-character string (e.g. gldebcpkoojijledacjeboaehblhfbjg).",
       }),
       {
         status: 400,
@@ -36,8 +66,6 @@ export default async (request, context) => {
       }
     );
   }
-
-  const extensionId = idMatch[1].toLowerCase();
 
   // Official Google Chrome Web Store CRX download endpoint
   const googleCrxUrl =
