@@ -1,4 +1,4 @@
-// Chrome Extension Downloader Frontend Logic
+// Chrome Extension Downloader Frontend Logic (v2.1)
 
 const inputEl = document.getElementById("extension-input");
 const btnClear = document.getElementById("btn-clear");
@@ -7,6 +7,8 @@ const idBadge = document.getElementById("id-badge");
 const detectionBox = document.getElementById("detection-box");
 const detectedIdEl = document.getElementById("detected-id");
 const detectedSlugEl = document.getElementById("detected-slug");
+const btnCopyId = document.getElementById("btn-copy-id");
+const copyText = document.getElementById("copy-text");
 
 const btnDownloadZip = document.getElementById("btn-download-zip");
 const btnDownloadCrx = document.getElementById("btn-download-crx");
@@ -14,24 +16,42 @@ const statusBox = document.getElementById("status-box");
 const statusIcon = document.getElementById("status-icon");
 const statusMessage = document.getElementById("status-message");
 
+// Example Pills
 const exampleSortlens = document.getElementById("example-sortlens");
 const exampleUblock = document.getElementById("example-ublock");
+const exampleDarkreader = document.getElementById("example-darkreader");
+const exampleReact = document.getElementById("example-react");
 
-// Helper: Extract 32-char ID and slug from input
+// Helper: Extract 32-char ID and formatted slug from input
 function parseInput(val) {
   const text = (val || "").trim();
   const idMatch = text.match(/([a-p]{32})/i);
   const id = idMatch ? idMatch[1].toLowerCase() : null;
 
-  let slug = "";
+  let rawSlug = "";
+  let cleanName = "Chrome Extension";
+
   if (text.includes("chromewebstore.google.com/detail/")) {
     const parts = text.split("/detail/")[1]?.split("/");
     if (parts && parts.length > 0 && parts[0] !== id) {
-      slug = parts[0];
+      rawSlug = parts[0];
+      cleanName = rawSlug
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+    }
+  } else if (text.includes("chrome.google.com/webstore/detail/")) {
+    const parts = text.split("/detail/")[1]?.split("/");
+    if (parts && parts.length > 0 && parts[0] !== id) {
+      rawSlug = parts[0];
+      cleanName = rawSlug
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
     }
   }
 
-  return { id, slug };
+  return { id, slug: rawSlug, cleanName };
 }
 
 // Update UI on input change
@@ -39,13 +59,13 @@ function updateUI() {
   const val = inputEl.value;
   btnClear.style.display = val ? "flex" : "none";
 
-  const { id, slug } = parseInput(val);
+  const { id, cleanName } = parseInput(val);
 
   if (id) {
-    idBadge.style.display = "inline-block";
+    idBadge.style.display = "inline-flex";
     detectionBox.style.display = "block";
     detectedIdEl.textContent = id;
-    detectedSlugEl.textContent = slug ? `(${slug})` : "";
+    detectedSlugEl.textContent = cleanName;
     hideStatus();
   } else {
     idBadge.style.display = "none";
@@ -54,6 +74,14 @@ function updateUI() {
 }
 
 inputEl.addEventListener("input", updateUI);
+
+// Trigger download when user presses Enter
+inputEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleDownload("zip");
+  }
+});
 
 btnClear.addEventListener("click", () => {
   inputEl.value = "";
@@ -75,22 +103,61 @@ btnPaste.addEventListener("click", async () => {
   }
 });
 
-// Example Click Handlers
-exampleSortlens.addEventListener("click", () => {
-  inputEl.value = "https://chromewebstore.google.com/detail/sortlens-sort-instagram-t/lankjdlpcafockikacbnbdngppglhjim";
-  updateUI();
-  hideStatus();
-});
+// Copy ID Button
+if (btnCopyId) {
+  btnCopyId.addEventListener("click", async () => {
+    const id = detectedIdEl.textContent;
+    if (id) {
+      try {
+        await navigator.clipboard.writeText(id);
+        copyText.textContent = "Copied!";
+        btnCopyId.style.color = "#10b981";
+        setTimeout(() => {
+          copyText.textContent = "Copy";
+          btnCopyId.style.color = "";
+        }, 1500);
+      } catch (e) {
+        copyText.textContent = "Copied!";
+        setTimeout(() => (copyText.textContent = "Copy"), 1500);
+      }
+    }
+  });
+}
 
-exampleUblock.addEventListener("click", () => {
-  inputEl.value = "https://chromewebstore.google.com/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm";
+// Example Click Handlers
+function loadExample(url) {
+  inputEl.value = url;
   updateUI();
   hideStatus();
-});
+}
+
+if (exampleSortlens) {
+  exampleSortlens.addEventListener("click", () =>
+    loadExample("https://chromewebstore.google.com/detail/sortlens-sort-instagram-t/lankjdlpcafockikacbnbdngppglhjim")
+  );
+}
+
+if (exampleUblock) {
+  exampleUblock.addEventListener("click", () =>
+    loadExample("https://chromewebstore.google.com/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm")
+  );
+}
+
+if (exampleDarkreader) {
+  exampleDarkreader.addEventListener("click", () =>
+    loadExample("https://chromewebstore.google.com/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh")
+  );
+}
+
+if (exampleReact) {
+  exampleReact.addEventListener("click", () =>
+    loadExample("https://chromewebstore.google.com/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi")
+  );
+}
 
 // Status Box Helpers
 function showStatus(htmlOrText, type = "error") {
-  statusBox.className = `status-box ${type}`;
+  statusBox.className = `status-panel ${type}`;
   statusBox.style.display = "flex";
   statusIcon.innerHTML =
     type === "error"
@@ -113,9 +180,14 @@ function extractZipFromCrx(arrayBuffer) {
   }
 
   // Check CRX magic: "Cr24" (0x43, 0x72, 0x32, 0x34)
-  const isCrx = bytes.length >= 16 && bytes[0] === 0x43 && bytes[1] === 0x72 && bytes[2] === 0x32 && bytes[3] === 0x34;
+  const isCrx =
+    bytes.length >= 16 &&
+    bytes[0] === 0x43 &&
+    bytes[1] === 0x72 &&
+    bytes[2] === 0x32 &&
+    bytes[3] === 0x34;
+
   if (!isCrx) {
-    // Return original if magic doesn't match
     return bytes;
   }
 
@@ -149,7 +221,6 @@ function extractZipFromCrx(arrayBuffer) {
   }
 
   if (zipOffset > 0) {
-    // TypedArray.slice creates a brand-new contiguous ArrayBuffer
     return bytes.slice(zipOffset);
   }
 
@@ -169,7 +240,6 @@ function triggerDownload(blob, filename) {
   // Keep anchor in DOM briefly, do NOT revoke immediately (prevents Chrome 0-byte bug)
   setTimeout(() => {
     a.remove();
-    // Delay revocation by 60 seconds so browser download manager finishes streaming
     setTimeout(() => {
       window.URL.revokeObjectURL(downloadUrl);
     }, 60000);
@@ -189,19 +259,24 @@ async function handleDownload(format) {
   }
 
   const activeBtn = format === "zip" ? btnDownloadZip : btnDownloadCrx;
-  const originalText = activeBtn.querySelector(".btn-text").textContent;
+  const originalTitle = activeBtn.querySelector(".btn-main-title").textContent;
+  const originalSubtitle = activeBtn.querySelector(".btn-sub-title")?.textContent;
   const spinner = activeBtn.querySelector(".spinner");
 
   // Loading state
   btnDownloadZip.disabled = true;
   btnDownloadCrx.disabled = true;
   if (spinner) spinner.style.display = "block";
-  activeBtn.querySelector(".btn-text").textContent = format === "zip" ? "Fetching & Unpacking ZIP..." : "Downloading CRX...";
+  activeBtn.querySelector(".btn-main-title").textContent =
+    format === "zip" ? "Fetching & Unpacking ZIP..." : "Downloading CRX...";
+  if (activeBtn.querySelector(".btn-sub-title")) {
+    activeBtn.querySelector(".btn-sub-title").textContent = "Connecting to Google Store servers...";
+  }
+
   showStatus(`Connecting to Google Chrome Web Store for ID: <code>${id}</code>...`, "success");
 
   try {
     const filename = slug ? `${slug}` : id;
-    // Always request the file from the backend function
     const apiUrl = `/api/download?id=${encodeURIComponent(id)}&format=${format}&name=${encodeURIComponent(filename)}`;
 
     const response = await fetch(apiUrl);
@@ -253,17 +328,25 @@ async function handleDownload(format) {
     btnDownloadZip.disabled = false;
     btnDownloadCrx.disabled = false;
     if (spinner) spinner.style.display = "none";
-    activeBtn.querySelector(".btn-text").textContent = originalText;
+    activeBtn.querySelector(".btn-main-title").textContent = originalTitle;
+    if (activeBtn.querySelector(".btn-sub-title")) {
+      activeBtn.querySelector(".btn-sub-title").textContent = originalSubtitle;
+    }
   }
 }
 
 btnDownloadZip.addEventListener("click", () => handleDownload("zip"));
 btnDownloadCrx.addEventListener("click", () => handleDownload("crx"));
 
-// Auto-populate SortLens if input is empty on initial load
-if (!inputEl.value) {
-  inputEl.value = "https://chromewebstore.google.com/detail/sortlens-sort-instagram-t/lankjdlpcafockikacbnbdngppglhjim";
-  updateUI();
+// Force input to be completely BLANK on initial load, reload, and page restore
+function forceBlankInput() {
+  if (inputEl) {
+    inputEl.value = "";
+    updateUI();
+  }
 }
 
+forceBlankInput();
+window.addEventListener("DOMContentLoaded", forceBlankInput);
+window.addEventListener("pageshow", forceBlankInput);
 
