@@ -7,23 +7,22 @@ echo.
 
 cd /d "%~dp0"
 
-echo [*] Initializing Git repository...
-git init
+if not exist ".git" (
+    echo [*] Initializing Git repository...
+    git init
+    git branch -M main
+    git remote add origin https://github.com/hitesh3119/Chrome-Extension-Downloader.git
+) else (
+    git remote set-url origin https://github.com/hitesh3119/Chrome-Extension-Downloader.git 2>nul
+)
 
-echo [*] Adding all project files (frontend, netlify functions, configs)...
+echo [*] Staging all files...
 git add .
 
 echo [*] Committing files...
-git commit -m "Initial commit: Complete Chrome Extension Downloader with Netlify functions"
+git commit -m "Update: keep input blank by default and offline sync improvements"
 
-echo [*] Setting branch to main...
-git branch -M main
-
-echo [*] Setting remote origin...
-git remote remove origin 2>nul
-git remote add origin https://github.com/hitesh3119/Chrome-Extension-Downloader.git
-
-echo [*] Pushing to GitHub...
+echo [*] Pushing to GitHub (main branch)...
 git push -u origin main
 
 echo.
