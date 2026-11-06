@@ -3,12 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CRX & ZIP Downloader - Download Any Chrome Extension Offline</title>
-  <meta name="description" content="Download any Chrome Extension directly as an unpacked ZIP or CRX file from Chrome Web Store. Fast, modern, and ready for Chrome Developer Mode.">
+  <title>Download Chrome Extensions as ZIP & CRX Online</title>
+  <meta name="description" content="Download any Chrome extension offline as an unpacked ZIP or original CRX directly from Chrome Web Store. Fast, free, and secure online extractor tool.">
+  <meta name="keywords" content="download chrome extension as zip, crx to zip converter, chrome extension downloader, download crx online, unpack chrome extension, chrome extension source viewer, chrome developer mode zip, hitesh khambhoo">
+  <meta name="author" content="Hitesh Khambhoo">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://hiteshkhambhoo.com/tools/chrome-extension-downloader">
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Download Chrome Extensions as ZIP & CRX Online">
+  <meta property="og:description" content="Download any Chrome extension offline as an unpacked ZIP or original CRX directly from Chrome Web Store. Fast, free, and secure online extractor tool.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hiteshkhambhoo.com/tools/chrome-extension-downloader">
+  <meta property="og:site_name" content="Hitesh Khambhoo Tools">
+
+  <!-- Twitter Card Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Download Chrome Extensions as ZIP & CRX Online">
+  <meta name="twitter:description" content="Download any Chrome extension offline as an unpacked ZIP or original CRX directly from Chrome Web Store. Fast, free, and secure online extractor tool.">
+  <meta name="twitter:creator" content="@hiteshkhambhoo">
+
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- JSON-LD WebApplication Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Chrome Extension CRX & ZIP Downloader",
+    "url": "https://hiteshkhambhoo.com/tools/chrome-extension-downloader",
+    "description": "Download any Chrome extension offline as an unpacked ZIP or original CRX directly from Chrome Web Store.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires Chromium browser (Chrome, Brave, Edge, Opera, Arc)",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Hitesh Khambhoo",
+      "url": "https://hiteshkhambhoo.com"
+    },
+    "creator": {
+      "@type": "Person",
+      "name": "Hitesh Khambhoo",
+      "url": "https://hiteshkhambhoo.com"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD FAQPage Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I download a Chrome extension as a ZIP file?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Paste any Chrome Web Store URL or 32-character extension ID into the extractor, then click Download as ZIP. The tool strips CRX3 protocol buffer headers and generates a clean ZIP archive ready for Chrome Developer Mode."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I install an unpacked ZIP extension in Chrome?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Extract the downloaded ZIP archive into a folder. In Chrome, navigate to chrome://extensions, toggle Developer mode in the top right corner, click Load unpacked in the top left, and select your extracted folder."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I download extensions for Brave, Edge, Opera, and Arc?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, all Chromium-based browsers support loading unpacked extensions created by this tool."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <!-- Ambient Animated Background Glows -->
@@ -23,27 +104,38 @@
     <!-- Top Navigation Bar -->
     <nav class="navbar">
       <div class="nav-brand">
-        <div class="nav-logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-            <line x1="12" y1="22.08" x2="12" y2="12"/>
-          </svg>
-        </div>
-        <span class="brand-name">CRX<span class="brand-accent">Extractor</span></span>
-        <span class="version-tag">v2.1</span>
+        <a href="#extractor" class="nav-logo-link">
+          <div class="nav-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
+          <span class="brand-name">CRX<span class="brand-accent">Extractor</span></span>
+        </a>
+        <span class="version-tag">v2.2</span>
+      </div>
+
+      <!-- Quick Nav Links -->
+      <div class="nav-links-middle">
+        <a href="#extractor" class="nav-anchor">Extractor</a>
+        <a href="#features" class="nav-anchor">Features</a>
+        <a href="#guide" class="nav-anchor">Guide</a>
+        <a href="#faq" class="nav-anchor">FAQ</a>
       </div>
 
       <div class="nav-actions">
-        <div class="status-indicator">
-          <span class="status-dot"></span>
-          <span class="status-text">Serverless API Active</span>
-        </div>
-        <a href="https://github.com/hitesh3119/Chrome-Extension-Downloader" target="_blank" rel="noopener noreferrer" class="nav-github-btn">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <!-- Developer Credit Badge in Navbar -->
+        <a href="https://hiteshkhambhoo.com" target="_blank" rel="noopener" class="nav-author-badge" title="Visit Developer Website">
+          <span class="author-avatar">HK</span>
+          <span class="author-text">by <strong>Hitesh Khambhoo</strong></span>
+        </a>
+        <a href="https://github.com/hitesh3119/Chrome-Extension-Downloader" target="_blank" rel="noopener noreferrer" class="nav-github-btn" title="View Source on GitHub">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
           </svg>
-          <span>Star on GitHub</span>
+          <span>GitHub</span>
         </a>
       </div>
     </nav>
@@ -51,10 +143,10 @@
     <!-- Main Container -->
     <main class="main-content">
       <!-- Hero Header -->
-      <section class="hero-section">
+      <section class="hero-section" id="extractor">
         <div class="hero-badge">
           <span class="badge-icon">⚡</span>
-          <span>Fast, Offline & Manifest V3 Compatible</span>
+          <span>Engineered by Hitesh Khambhoo &bull; Manifest V3 Ready</span>
         </div>
         <h1 class="hero-title">
           Download Chrome Extensions <br>
@@ -225,8 +317,33 @@
         </div>
       </section>
 
+      <!-- Developer Spotlight Banner -->
+      <section class="developer-showcase">
+        <div class="dev-spotlight-card">
+          <div class="dev-avatar-wrap">
+            <div class="dev-avatar">HK</div>
+          </div>
+          <div class="dev-info-wrap">
+            <div class="dev-role-badge">Lead Architect & Full-Stack Developer</div>
+            <h3 class="dev-name">Hitesh Khambhoo</h3>
+            <p class="dev-bio">
+              Software engineer, web architect, and high-performance developer. Built with ultra-clean serverless architecture to streamline Chrome extension auditing, source extraction, and offline research.
+            </p>
+            <div class="dev-links-row">
+              <a href="https://hiteshkhambhoo.com" target="_blank" rel="noopener" class="dev-cta-btn">
+                <span>Visit hiteshkhambhoo.com</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+              <a href="https://github.com/hitesh3119" target="_blank" rel="noopener" class="dev-gh-btn">
+                <span>Follow on GitHub</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Feature Highlights -->
-      <section class="features-grid">
+      <section class="features-grid" id="features">
         <div class="feature-item">
           <div class="feat-icon-box">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
@@ -261,7 +378,7 @@
       </section>
 
       <!-- Step-by-Step Installation Guide -->
-      <section class="guide-panel">
+      <section class="guide-panel" id="guide">
         <div class="guide-header">
           <div class="guide-title-group">
             <span class="guide-tag">Quick Setup</span>
@@ -300,8 +417,32 @@
         </div>
       </section>
 
+      <!-- Comprehensive SEO Keywords & Knowledge Guide -->
+      <section class="seo-knowledge-section">
+        <div class="seo-content-box">
+          <h2>Why Use Chrome Extension CRX & ZIP Downloader?</h2>
+          <p>
+            Whether you are a security researcher analyzing Chrome extensions, a developer reverse-engineering Manifest V3 architecture, or an enthusiast wanting to backup your favorite extensions offline, this free online tool provides direct access to Google Chrome Web Store packages.
+          </p>
+          <div class="seo-features-list">
+            <div class="seo-col">
+              <h4>Direct Chrome Web Store Extraction</h4>
+              <p>Every file is pulled live from Google's content delivery network (<code>clients2.google.com</code>), guaranteeing clean, unaltered binary archives.</p>
+            </div>
+            <div class="seo-col">
+              <h4>Bypass Chrome Web Store Restrictions</h4>
+              <p>Run extensions offline on isolated development machines, sideload extensions without requiring Google account login, and safeguard your workflow against extension removals.</p>
+            </div>
+            <div class="seo-col">
+              <h4>Multi-Browser Sideloading</h4>
+              <p>Unpacked ZIP archives are compatible with all Chromium engines including Brave, Microsoft Edge, Opera GX, Vivaldi, and Arc Browser.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- FAQ Section -->
-      <section class="faq-section">
+      <section class="faq-section" id="faq">
         <h3 class="faq-heading">Frequently Asked Questions</h3>
         <div class="faq-list">
           <details class="faq-item">
@@ -339,11 +480,24 @@
       <!-- Footer -->
       <footer class="app-footer">
         <div class="footer-content">
-          <p>Built with Netlify Serverless Functions &bull; 100% Free & Open Source</p>
+          <div class="footer-author-brand">
+            <p class="footer-dev-credit">
+              Engineered with precision by <a href="https://hiteshkhambhoo.com" target="_blank" rel="noopener" class="highlight-author">Hitesh Khambhoo</a>
+            </p>
+            <span class="footer-subtext">Web Architect, Full-Stack Developer & High-Performance Systems Engineer</span>
+          </div>
           <div class="footer-links">
-            <a href="https://github.com/hitesh3119/Chrome-Extension-Downloader" target="_blank" rel="noopener">GitHub</a>
+            <a href="#extractor">Extractor</a>
             <span>&bull;</span>
-            <a href="https://chromewebstore.google.com/" target="_blank" rel="noopener">Chrome Web Store</a>
+            <a href="#features">Features</a>
+            <span>&bull;</span>
+            <a href="#guide">Guide</a>
+            <span>&bull;</span>
+            <a href="#faq">FAQ</a>
+            <span>&bull;</span>
+            <a href="https://hiteshkhambhoo.com" target="_blank" rel="noopener">hiteshkhambhoo.com</a>
+            <span>&bull;</span>
+            <a href="https://github.com/hitesh3119/Chrome-Extension-Downloader" target="_blank" rel="noopener">GitHub</a>
           </div>
         </div>
       </footer>
